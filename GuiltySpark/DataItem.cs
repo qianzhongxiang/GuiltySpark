@@ -12,14 +12,12 @@ namespace GuiltySpark
 
 
 
-    [Serializable]
 
-    public class DataItem : MarshalByRefObject
+    public class DataItem 
     {
-        public DataItemType Type { get; protected set; }
+        public DataItemType Type { get; internal protected set; }
+        public DataInfo Info { get; internal protected set; }
     }
-
-    [Serializable]
 
     public class LocalDataItem : DataItem
     {
@@ -29,8 +27,6 @@ namespace GuiltySpark
         }
         public string Directory { get; set; }
     }
-
-    [Serializable]
 
     public class DBDataItem : DataItem
     {

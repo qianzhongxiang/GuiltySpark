@@ -1,24 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace GuiltySpark
 {
-    [Serializable]
-    public abstract class DataPatchBase: MarshalByRefObject
+    public abstract class DataPatchBase
     {
 
-        public string RootDirectory;
+        internal protected string RootDirectory;
 
+        public Action<string> WriteLog { get; internal protected set; }
         public abstract Guid ID { get; }
 
         public abstract int DataVersion { get; }
 
         public abstract string Product { get; }
 
-        public abstract int MiniTargetDataVersion { get; set; }
-        public abstract int MaxTargetDataVersion { get; set; }
 
-        public DataPatchOptions Options;
+        public abstract int MiniTargetDataVersion { get;  }
+        public abstract int MaxTargetDataVersion { get;  }
+
+        public DataPatchOptions Options { get; internal protected set; }
 
         public abstract void Run();
 
@@ -33,7 +33,10 @@ namespace GuiltySpark
     public class PatchInfo
     {
         public Guid ID { get; set; }
+
         public int MiniTargetDataVersion { get; set; }
         public int MaxTargetDataVersion { get; set; }
+
+        public int DataVersion { get; set; }
     }
 }

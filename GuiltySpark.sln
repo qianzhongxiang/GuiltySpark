@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitGuiltySpark", "Unit\Uni
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test.DataPatch", "Unit\Test.DataPatch\Test.DataPatch.csproj", "{2CBEB30A-724B-4BD1-811A-40AD6D1F11EC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UpdaterClient", "UpdaterClient\UpdaterClient.csproj", "{0FA0BAF4-D42F-466C-9A7A-098609A878E7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{2CBEB30A-724B-4BD1-811A-40AD6D1F11EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2CBEB30A-724B-4BD1-811A-40AD6D1F11EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2CBEB30A-724B-4BD1-811A-40AD6D1F11EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0FA0BAF4-D42F-466C-9A7A-098609A878E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0FA0BAF4-D42F-466C-9A7A-098609A878E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0FA0BAF4-D42F-466C-9A7A-098609A878E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0FA0BAF4-D42F-466C-9A7A-098609A878E7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

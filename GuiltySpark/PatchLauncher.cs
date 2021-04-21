@@ -10,10 +10,11 @@ namespace GuiltySpark
     public abstract class PatchLauncher : MarshalByRefObject
     {
         public static string DATAINFOFILENAME = "DataInfo.json";
+        public Action<string> Logger;
         /// <summary>
         /// 默认程序集更目录的上级
         /// </summary>
-        public string TargetRootDir { get; internal protected set; } = new System.IO.DirectoryInfo(System.IO.Path.GetDirectoryName(new Uri(Assembly.GetAssembly(typeof(PatchLauncher)).CodeBase).LocalPath)).Parent.FullName;
+        public string TargetRootDir { get; set; } = new System.IO.DirectoryInfo(System.IO.Path.GetDirectoryName(new Uri(Assembly.GetAssembly(typeof(PatchLauncher)).CodeBase).LocalPath)).Parent.FullName;
 
         //protected abstract DataPatchBase GetDataPatchInstance(Type patchType,AssemblyName assemblyName, AppDomain appDomain);
 
@@ -75,6 +76,7 @@ namespace GuiltySpark
                     AppDomainSetup setup = AppDomain.CurrentDomain.SetupInformation;
                     domain = AppDomain.CreateDomain(new System.IO.DirectoryInfo(enumer.Current).Name + "Domain", evidence, setup);
                     var dLauncher = domain.CreateInstanceFromAndUnwrap(new Uri(this.GetType().Assembly.CodeBase).LocalPath, this.GetType().FullName) as PatchLauncher;
+                    dLauncher.Logger = this.Logger;
                     dLauncher.Run(enumer.Current);
                 }
                 catch (Exception)
@@ -97,52 +99,6 @@ namespace GuiltySpark
             try
             {
                 var filepath = System.IO.Path.Combine(patchDir, "patch.exe");
-                //string instanceFullName = null;
-                //using (var domainManager = new AssemblyReflectionManager())
-                //{
-                //    var success = domainManager.LoadAssembly(filepath, new System.IO.DirectoryInfo(patchDir).Name + "Domain");
-                //    if (!success)
-                //    {
-
-                //    }
-                //    instanceFullName = domainManager.Reflect(filepath, (a) =>
-                //    {
-
-                //        var types = a.GetTypes();
-                //        //  var gAss = asss.FirstOrDefault(ass => ass.GetName().Name == "GuiltySpark");
-                //        //  if (gAss is null) {
-
-                //        //      return default;
-                //        //  }
-                //        //var parentC=  gAss.GetTypes().FirstOrDefault(t => t.Name == "DataPatchBase");
-                //        foreach (var item in types)
-                //        {
-                //            var c = item;
-                //            while (c.BaseType != typeof(object) && c.BaseType != null)
-                //            {
-                //                if (c.BaseType.Name == "DataPatchBase")
-                //                {
-                //                    return item.FullName;
-                //                }
-                //                else
-                //                {
-                //                    c = c.BaseType;
-                //                }
-                //            }
-
-                //            //if (item.IsSubclassOf(parentC))
-                //            //    return a.CreateInstance(item.FullName) as DataPatchBase;
-                //        }
-                //        return null;
-                //    });
-
-
-                //}
-
-
-                //if (instanceFullName is null)
-                //{
-                //}
                 var sss = Assembly.Load(AssemblyName.GetAssemblyName(filepath));
                 var types = sss.GetTypes();
                 foreach (var item in types)
@@ -155,8 +111,8 @@ namespace GuiltySpark
                         options.DataItems = GetItems(instance.MiniTargetDataVersion, instance.MaxTargetDataVersion);
                         options.ItemFinishCallback = ItemFinishedCallback;
                         instance.Options = options;
-
-                        instance.RootDirectory = "";
+                        instance.WriteLog = this.Logger;
+                        instance.RootDirectory = System.IO.Path.Combine(LocalDataDirectory(), $"{DateTime.Now.ToString("yyyyMMddHHmmss")}.{instance.DataVersion}");
                         //instance
                         instance.Backup();
                         instance.Run();
@@ -171,7 +127,7 @@ namespace GuiltySpark
                 throw;
             }
         }
-        protected virtual IEnumerable<DataItem> GetItems(int minDataVersion, int maxDataVersion)
+        public virtual IEnumerable<DataItem> GetItems(int minDataVersion, int maxDataVersion, bool db = true)
         {
             var dirct = LocalDataDirectory();
             var datas = new System.IO.DirectoryInfo(dirct).GetDirectories();
@@ -197,11 +153,14 @@ namespace GuiltySpark
                 {
                     continue;
                 }
-                yield return new LocalDataItem { Directory = item.FullName };
+                yield return new LocalDataItem { Info = dataInfo, Directory = item.FullName };
             }
-
-            yield return new DBDataItem { LinkString = DBLinkString() };
+            if (db)
+            {
+                yield return new DBDataItem { LinkString = DBLinkString() };
+            }
         }
+
 
         protected abstract string LocalDataDirectory();
         protected abstract string DBLinkString();
@@ -209,18 +168,7 @@ namespace GuiltySpark
         public virtual IEnumerable<string> GetPatchs()
         {
             var dir = System.IO.Path.GetDirectoryName(new Uri(typeof(PatchLauncher).Assembly.CodeBase).LocalPath);
-            var list = new System.IO.DirectoryInfo(dir).GetFiles("list.json").FirstOrDefault();
-            if (list is null)
-            {
-                yield break;
-            }
-            List<PatchInfo> patchInfos = default;
-            using (var streamReader = new System.IO.StreamReader(list.FullName))
-            using (var jsonTxtReader = new Newtonsoft.Json.JsonTextReader(streamReader))
-            {
-                var jser = new Newtonsoft.Json.JsonSerializer();
-                patchInfos = jser.Deserialize<List<PatchInfo>>(jsonTxtReader);
-            }
+            List<PatchInfo> patchInfos = GetPatchInfos();
 
             var patchDir = new System.IO.DirectoryInfo(System.IO.Path.Combine(dir, "patchs"));
             foreach (var item in patchInfos)
@@ -232,6 +180,25 @@ namespace GuiltySpark
                 }
                 yield return UnCompress(patchFolder.FullName);
             }
+        }
+
+        public virtual List<PatchInfo> GetPatchInfos()
+        {
+            var dir = System.IO.Path.GetDirectoryName(new Uri(typeof(PatchLauncher).Assembly.CodeBase).LocalPath);
+            var list = new System.IO.DirectoryInfo(dir).GetFiles("list.json").FirstOrDefault();
+            if (list is null)
+            {
+                return new List<PatchInfo>();
+            }
+            List<PatchInfo> patchInfos = default;
+            using (var streamReader = new System.IO.StreamReader(list.FullName))
+            using (var jsonTxtReader = new Newtonsoft.Json.JsonTextReader(streamReader))
+            {
+                var jser = new Newtonsoft.Json.JsonSerializer();
+                patchInfos = jser.Deserialize<List<PatchInfo>>(jsonTxtReader);
+            }
+
+            return patchInfos;
         }
 
         public virtual string UnCompress(string filePath)

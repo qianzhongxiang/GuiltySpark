@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Configuration;
 using System.Reflection;
+using System.Xml;
 
 namespace PatchClient
 {
@@ -14,21 +15,26 @@ namespace PatchClient
         }
     }
 
-    class PatchLauncher : GuiltySpark.PatchLauncher
+    public class PatchLauncher : GuiltySpark.PatchLauncher
     {
         protected override string DBLinkString()
         {
-            return GetConfig().AppSettings.Settings["ConnStrProfile"]?.Value;
+            return GetConfig("ConnStrProfile").Attributes["value"].Value;
         }
+
 
         protected override string LocalDataDirectory()
         {
-            return GetConfig().AppSettings.Settings["data_path"]?.Value;
+            return GetConfig("data_path").Attributes["value"].Value;
         }
 
-        private Configuration GetConfig()
+        private XmlNode GetConfig(string data_path)
         {
-            return ConfigurationManager.OpenExeConfiguration(System.IO.Path.Combine(TargetRootDir, "Tornado2000S.exe.config"));
+
+            var xd = new XmlDocument();
+            xd.Load(System.IO.Path.Combine(TargetRootDir, "Tornado2000S.exe.config"));
+            var dataPathNode = xd.SelectSingleNode($"configuration/appSettings/add[@key=\"{data_path}\"]");
+            return dataPathNode;
         }
     }
 }
