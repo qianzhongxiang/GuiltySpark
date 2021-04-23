@@ -36,13 +36,13 @@ namespace UpdaterClient
             var textBoxOutputter = new TextBoxOutputter(consoleViewer);
             Console.SetOut(textBoxOutputter);
             launcher = new PatchClient.PatchLauncher();
-        
+            launcher.Logger = new ConsoleLogger { TextWriter = textBoxOutputter };
             var infos = launcher.GetPatchInfos();
             patchsViewer.Items.Clear();
             ApplicationDir = launcher.TargetRootDir;
             foreach (var item in infos)
             {
-                patchsViewer.Items.Add(new ListViewItem { Height = 32, Content = $"patch:v{item.DataVersion}" });
+                patchsViewer.Items.Add(new ListViewItem { Height = 32, Content = $"Data Patch : v{item.DataVersion}" });
                 Console.WriteLine($"loaded a patch:v{item.DataVersion}");
             }
 
@@ -73,7 +73,7 @@ namespace UpdaterClient
                 if (result == System.Windows.Forms.DialogResult.OK)
                 {
                     ApplicationDir = dialog.SelectedPath;
-                    launcher.TargetRootDir = ApplicationDir;
+                    launcher.TargetRootDir = dialog.SelectedPath;
                     UpdateItems();
                 }
                 else
@@ -86,15 +86,25 @@ namespace UpdaterClient
         private void btn_run_Click(object sender, RoutedEventArgs e)
         {
             launcher.TargetRootDir = ApplicationDir;
+            Console.WriteLine($"launcher.TargetRootDir:{ launcher.TargetRootDir }");
             try
             {
-                launcher.Run();
-                UpdateItems();
+                Task.Run(delegate
+                {
+                    launcher.Run();
+                    this.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, (System.Windows.Forms.MethodInvoker)delegate { UpdateItems(); });
+                });
             }
             catch (Exception ex)
             {
                 System.Windows.MessageBox.Show(ex.Message);
             }
+        }
+
+        private void btn_restore_Click(object sender, RoutedEventArgs e)
+        {
+            var ww = new Restore();
+            ww.ShowDialog();
         }
     }
 
@@ -121,4 +131,6 @@ namespace UpdaterClient
             get { return System.Text.Encoding.UTF8; }
         }
     }
+
+
 }

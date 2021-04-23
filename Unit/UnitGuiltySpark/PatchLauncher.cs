@@ -11,7 +11,7 @@ namespace UnitGuiltySpark
         public void Init()
         {
             var launcher = new PatchClient.PatchLauncher();
-            launcher.Logger = (ss) => { Console.WriteLine(ss); };
+            //launcher.Logger = (ss) => { Console.WriteLine(ss); };
             launcher.Run();
         }
     }

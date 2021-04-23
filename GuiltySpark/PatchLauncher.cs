@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace GuiltySpark
 {
@@ -10,7 +11,7 @@ namespace GuiltySpark
     public abstract class PatchLauncher : MarshalByRefObject
     {
         public static string DATAINFOFILENAME = "DataInfo.json";
-        public Action<string> Logger;
+        public ConsoleLogger Logger;
         /// <summary>
         /// 默认程序集更目录的上级
         /// </summary>
@@ -66,17 +67,22 @@ namespace GuiltySpark
         }
         public virtual void Run()
         {
+            Console.WriteLine($"Run");
             var enumer = GetPatchs().GetEnumerator();
             AppDomain domain = null;
             while (enumer.MoveNext())
             {
+                Console.WriteLine($"Run patch:{new System.IO.DirectoryInfo(enumer.Current).Name}");
                 try
                 {
-                    System.Security.Policy.Evidence evidence = new System.Security.Policy.Evidence(AppDomain.CurrentDomain.Evidence);
-                    AppDomainSetup setup = AppDomain.CurrentDomain.SetupInformation;
-                    domain = AppDomain.CreateDomain(new System.IO.DirectoryInfo(enumer.Current).Name + "Domain", evidence, setup);
+                    //System.Security.Policy.Evidence evidence = new System.Security.Policy.Evidence(AppDomain.CurrentDomain.Evidence);
+                    //AppDomainSetup setup = AppDomain.CurrentDomain.SetupInformation;
+                    domain = AppDomain.CreateDomain(new System.IO.DirectoryInfo(enumer.Current).Name + "Domain"/*, evidence, setup*/);
+                    domain.ClearPrivatePath();
+                    domain.AppendPrivatePath(enumer.Current);
                     var dLauncher = domain.CreateInstanceFromAndUnwrap(new Uri(this.GetType().Assembly.CodeBase).LocalPath, this.GetType().FullName) as PatchLauncher;
                     dLauncher.Logger = this.Logger;
+                    dLauncher.TargetRootDir = this.TargetRootDir;
                     dLauncher.Run(enumer.Current);
                 }
                 catch (Exception)
@@ -99,21 +105,23 @@ namespace GuiltySpark
             try
             {
                 var filepath = System.IO.Path.Combine(patchDir, "patch.exe");
+                Logger.WriteLine("start load patch.exe");
                 var sss = Assembly.Load(AssemblyName.GetAssemblyName(filepath));
                 var types = sss.GetTypes();
                 foreach (var item in types)
                 {
                     if (item.IsSubclassOf(typeof(DataPatchBase)))
                     {
-
+                        Logger.WriteLine("Get a entry");
                         instance = sss.CreateInstance(item.FullName) as DataPatchBase;
                         var options = new DataPatchOptions();
                         options.DataItems = GetItems(instance.MiniTargetDataVersion, instance.MaxTargetDataVersion);
                         options.ItemFinishCallback = ItemFinishedCallback;
+                        options.ApplicationDir = TargetRootDir;
+                        options.LocalDataDir = LocalDataDirectory();
                         instance.Options = options;
-                        instance.WriteLog = this.Logger;
-                        instance.RootDirectory = System.IO.Path.Combine(LocalDataDirectory(), $"{DateTime.Now.ToString("yyyyMMddHHmmss")}.{instance.DataVersion}");
-                        //instance
+                        instance.Logger = this.Logger;
+                        instance.RootDirectory = LocalDataDirectory($"history\\{DateTime.Now:yyyyMMddHHmmss}.{instance.DataVersion}");
                         instance.Backup();
                         instance.Run();
                         break;
@@ -127,9 +135,87 @@ namespace GuiltySpark
                 throw;
             }
         }
+
+        public virtual void Restore(string restoreDir, int patchDataVersion)
+        {
+            var infos = GetPatchInfos();
+            var info = infos.FirstOrDefault(i => i.DataVersion == patchDataVersion);
+            if (info is null)
+            {
+                throw new Exception("未找到合适的补丁包");
+            }
+            var dir = System.IO.Path.GetDirectoryName(new Uri(typeof(PatchLauncher).Assembly.CodeBase).LocalPath);
+            var patchDir = new System.IO.DirectoryInfo(System.IO.Path.Combine(dir, "patchs"));
+            var patchFolder = patchDir.GetDirectories(info.ID.ToString()).FirstOrDefault();
+            if (patchFolder is null)
+            {
+                throw new Exception("未找到合适的补丁包");
+            }
+            AppDomain domain = null;
+            try
+            {
+                System.Security.Policy.Evidence evidence = new System.Security.Policy.Evidence(AppDomain.CurrentDomain.Evidence);
+                AppDomainSetup setup = AppDomain.CurrentDomain.SetupInformation;
+                domain = AppDomain.CreateDomain(info.ID + "Domain", evidence, setup);
+                var dLauncher = domain.CreateInstanceFromAndUnwrap(new Uri(this.GetType().Assembly.CodeBase).LocalPath, this.GetType().FullName) as PatchLauncher;
+                dLauncher.TargetRootDir = this.TargetRootDir;
+                dLauncher.Logger = this.Logger;
+                dLauncher.Restore(restoreDir, patchFolder.FullName, patchDataVersion);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                if (domain != null)
+                {
+                    AppDomain.Unload(domain);
+                }
+            }
+        }
+
+        private void Restore(string restoreDir, string patchDir, int patchDataVersion)
+        {
+            var infos = GetPatchInfos();
+            DataPatchBase instance = null;
+            var info = infos.FirstOrDefault(i => i.DataVersion == patchDataVersion);
+            if (info is null)
+            {
+                throw new Exception("未找到合适的补丁包");
+            }
+            try
+            {
+                var filepath = System.IO.Path.Combine(patchDir, "patch.exe");
+                var sss = Assembly.Load(AssemblyName.GetAssemblyName(filepath));
+                var types = sss.GetTypes();
+                foreach (var item in types)
+                {
+                    if (item.IsSubclassOf(typeof(DataPatchBase)))
+                    {
+
+                        instance = sss.CreateInstance(item.FullName) as DataPatchBase;
+                        var options = new DataPatchOptions();
+                        options.DataItems = GetItems(patchDataVersion, patchDataVersion);
+                        options.ItemFinishCallback = ItemFinishedCallback;
+                        instance.Options = options;
+                        instance.Logger = this.Logger;
+                        instance.RootDirectory = restoreDir;
+                        //instance
+                        instance.Restore();
+                        break;
+                    }
+                }
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
         public virtual IEnumerable<DataItem> GetItems(int minDataVersion, int maxDataVersion, bool db = true)
         {
-            var dirct = LocalDataDirectory();
+            var dirct = LocalDataDirectory("recipes");
             var datas = new System.IO.DirectoryInfo(dirct).GetDirectories();
 
             DataInfo dataInfo = default;
@@ -162,8 +248,8 @@ namespace GuiltySpark
         }
 
 
-        protected abstract string LocalDataDirectory();
-        protected abstract string DBLinkString();
+        public abstract string LocalDataDirectory(string relativePath = null);
+        public abstract string DBLinkString();
 
         public virtual IEnumerable<string> GetPatchs()
         {

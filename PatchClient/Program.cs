@@ -17,15 +17,23 @@ namespace PatchClient
 
     public class PatchLauncher : GuiltySpark.PatchLauncher
     {
-        protected override string DBLinkString()
+        public PatchLauncher()
+        {
+            ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            ConfigurationManager.AppSettings["noapp"] = "true";
+            ConfigurationManager.AppSettings["data_path"] = LocalDataDirectory();
+        }
+        public override string DBLinkString()
         {
             return GetConfig("ConnStrProfile").Attributes["value"].Value;
         }
 
 
-        protected override string LocalDataDirectory()
+        public override string LocalDataDirectory(string relativePath=null)
         {
-            return GetConfig("data_path").Attributes["value"].Value;
+            if (relativePath is null)
+                return GetConfig("data_path").Attributes["value"].Value;
+            return System.IO.Path.Combine(GetConfig("data_path").Attributes["value"].Value, relativePath);
         }
 
         private XmlNode GetConfig(string data_path)

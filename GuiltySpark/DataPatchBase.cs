@@ -7,7 +7,7 @@ namespace GuiltySpark
 
         internal protected string RootDirectory;
 
-        public Action<string> WriteLog { get; internal protected set; }
+        public ConsoleLogger Logger { get; internal protected set; }
         public abstract Guid ID { get; }
 
         public abstract int DataVersion { get; }

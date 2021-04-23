@@ -4,9 +4,10 @@ using System.Text;
 
 namespace GuiltySpark
 {
-    [Serializable]
-    public class DataPatchOptions : MarshalByRefObject
+    public class DataPatchOptions
     {
+        public string LocalDataDir { get; set; }
+        public string ApplicationDir { get; set; }
         public IEnumerable<DataItem> DataItems;
         public Action<DataItem, DataPatchBase> ItemFinishCallback;
     }

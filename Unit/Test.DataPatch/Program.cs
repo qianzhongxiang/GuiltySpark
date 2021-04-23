@@ -30,6 +30,7 @@ namespace Test.DataPatch
 
         public override void Restore()
         {
+            Logger?.WriteLine($"Is running Restore for dataVersion:{DataVersion}");
         }
 
         public override void Run()
@@ -37,7 +38,7 @@ namespace Test.DataPatch
             var enumer = Options.DataItems.GetEnumerator();
             while (enumer.MoveNext())
             {
-                WriteLog?.Invoke($"Is running patch for type:{Enum.GetName(typeof(DataItemType), enumer.Current.Type)}");
+                Logger?.WriteLine($"Is running patch for type:{Enum.GetName(typeof(DataItemType), enumer.Current.Type)}");
                 this.Options.ItemFinishCallback?.Invoke(enumer.Current,this);
             }
         }

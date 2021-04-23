@@ -5,13 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UpdaterClient"
         mc:Ignorable="d"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         Title="MainWindow" Height="800" Width="800">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="32"></RowDefinition>
+            <RowDefinition Height="42"></RowDefinition>
             <RowDefinition></RowDefinition>
             <RowDefinition Height="350"></RowDefinition>
-            <RowDefinition Height="32"></RowDefinition>
+            <RowDefinition Height="42"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition></ColumnDefinition>
@@ -21,12 +22,10 @@
             <Button Content="Broswe" x:Name="btn_browse" Click="btn_browse_Click"  Grid.Row="0" Width="80" HorizontalAlignment="Left"></Button>
             <Label x:Name="rootDir" Width="360" HorizontalAlignment="Left"></Label>
         </StackPanel>
-        <Button Content="RUN" x:Name="btn_run" Click="btn_run_Click" Grid.Row="3" Grid.ColumnSpan="2" Width="80" HorizontalAlignment="Right"></Button>
+        <Button Content="RUN"  x:Name="btn_run" Click="btn_run_Click" Grid.Row="3" Grid.ColumnSpan="2"  HorizontalAlignment="Right"></Button>
+        <Button Content="Restore" x:Name="btn_restore" Click="btn_restore_Click" Grid.Row="3" Grid.ColumnSpan="2"  HorizontalAlignment="Left"></Button>
 
-        <ListView x:Name="patchsViewer" Grid.Row="1" Grid.Column="0">
-            <ListViewItem Height="28" Content="DataPatch: V1000"></ListViewItem>
-            <ListViewItem Height="28" Content="DataPatch: V1000"></ListViewItem>
-            <ListViewItem Height="28" Content="DataPatch: V1000"></ListViewItem>
+        <ListView x:Name="patchsViewer" BorderThickness="2" BorderBrush="Gray" Grid.Row="1" Grid.Column="0">
         </ListView>
         <DataGrid x:Name="dataGrid" Grid.Row="1" Grid.Column="1" AutoGenerateColumns="False">
             <DataGrid.Columns>
@@ -50,7 +49,7 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <TextBox x:Name="consoleViewer" Grid.Row="2" Grid.ColumnSpan="2">
+        <TextBox Background="CadetBlue" IsReadOnly="True" x:Name="consoleViewer" BorderThickness="2" Margin="2" Grid.Row="2" Grid.ColumnSpan="2">
         </TextBox>
     </Grid>
 </Window>
