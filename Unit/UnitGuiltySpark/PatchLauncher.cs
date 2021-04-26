@@ -10,7 +10,7 @@ namespace UnitGuiltySpark
         [Fact]
         public void Init()
         {
-            var launcher = new PatchClient.PatchLauncher();
+            var launcher = new Patcher.Tornado2000S.PatchLauncher();
             //launcher.Logger = (ss) => { Console.WriteLine(ss); };
             launcher.Run();
         }

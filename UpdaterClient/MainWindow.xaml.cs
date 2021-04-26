@@ -22,7 +22,7 @@ namespace UpdaterClient
     /// </summary>
     public partial class MainWindow : Window
     {
-        PatchClient.PatchLauncher launcher;
+        Patcher.Tornado2000S.PatchLauncher launcher;
         public string ApplicationDir
         {
             get => this.rootDir.Content.ToString(); set
@@ -35,7 +35,7 @@ namespace UpdaterClient
             InitializeComponent();
             var textBoxOutputter = new TextBoxOutputter(consoleViewer);
             Console.SetOut(textBoxOutputter);
-            launcher = new PatchClient.PatchLauncher();
+            launcher = new Patcher.Tornado2000S.PatchLauncher();
             launcher.Logger = new ConsoleLogger { TextWriter = textBoxOutputter };
             var infos = launcher.GetPatchInfos();
             patchsViewer.Items.Clear();

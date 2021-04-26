@@ -15,8 +15,8 @@ namespace GuiltySpark
 
     public class DataItem 
     {
-        public DataItemType Type { get; internal protected set; }
-        public DataInfo Info { get; internal protected set; }
+        public DataItemType Type { get; set; }
+        public DataInfo Info { get; set; }
     }
 
     public class LocalDataItem : DataItem

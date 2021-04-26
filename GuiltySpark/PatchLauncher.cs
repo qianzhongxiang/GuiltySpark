@@ -67,12 +67,12 @@ namespace GuiltySpark
         }
         public virtual void Run()
         {
-            Console.WriteLine($"Run");
+            Console.WriteLine($"Guilty Spark:I got it, and redy to run, wait.");
             var enumer = GetPatchs().GetEnumerator();
             AppDomain domain = null;
             while (enumer.MoveNext())
             {
-                Console.WriteLine($"Run patch:{new System.IO.DirectoryInfo(enumer.Current).Name}");
+                Console.WriteLine($"Guilty Spark:ok, it named \"{new System.IO.DirectoryInfo(enumer.Current).Name}\"");
                 try
                 {
                     //System.Security.Policy.Evidence evidence = new System.Security.Policy.Evidence(AppDomain.CurrentDomain.Evidence);
@@ -87,6 +87,7 @@ namespace GuiltySpark
                 }
                 catch (Exception)
                 {
+                     Console.WriteLine($"Guilty Spark:Damn, it's broken, which the next?");
                     throw;
                 }
                 finally
@@ -105,14 +106,14 @@ namespace GuiltySpark
             try
             {
                 var filepath = System.IO.Path.Combine(patchDir, "patch.exe");
-                Logger.WriteLine("start load patch.exe");
+                Logger.WriteLine("Guilty Spark:I found a patch.exe，is that?");
                 var sss = Assembly.Load(AssemblyName.GetAssemblyName(filepath));
                 var types = sss.GetTypes();
                 foreach (var item in types)
                 {
                     if (item.IsSubclassOf(typeof(DataPatchBase)))
                     {
-                        Logger.WriteLine("Get a entry");
+                        Logger.WriteLine("Guilty Spark:I found a DataPatchBase, it's easy.");
                         instance = sss.CreateInstance(item.FullName) as DataPatchBase;
                         var options = new DataPatchOptions();
                         options.DataItems = GetItems(instance.MiniTargetDataVersion, instance.MaxTargetDataVersion);
@@ -131,6 +132,7 @@ namespace GuiltySpark
             }
             catch (Exception)
             {
+                Logger.WriteLine("Guilty Spark:Fuck, it doesn't work, have to restore it.");
                 instance?.Restore();
                 throw;
             }
@@ -213,40 +215,7 @@ namespace GuiltySpark
                 throw;
             }
         }
-        public virtual IEnumerable<DataItem> GetItems(int minDataVersion, int maxDataVersion, bool db = true)
-        {
-            var dirct = LocalDataDirectory("recipes");
-            var datas = new System.IO.DirectoryInfo(dirct).GetDirectories();
-
-            DataInfo dataInfo = default;
-            foreach (var item in datas)
-            {
-                var file = item.GetFiles(DATAINFOFILENAME).FirstOrDefault();
-                if (file is null)
-                {
-                    dataInfo = new DataInfo { DataVersion = 0 };
-                }
-                else
-                {
-                    using (var streamReader = new System.IO.StreamReader(file.FullName))
-                    using (var jsonTxtReader = new Newtonsoft.Json.JsonTextReader(streamReader))
-                    {
-                        var jser = new Newtonsoft.Json.JsonSerializer();
-                        dataInfo = jser.Deserialize<DataInfo>(jsonTxtReader);
-                    }
-                }
-                if (dataInfo.DataVersion < minDataVersion || dataInfo.DataVersion > maxDataVersion)
-                {
-                    continue;
-                }
-                yield return new LocalDataItem { Info = dataInfo, Directory = item.FullName };
-            }
-            if (db)
-            {
-                yield return new DBDataItem { LinkString = DBLinkString() };
-            }
-        }
-
+        public abstract IEnumerable<DataItem> GetItems(int minDataVersion, int maxDataVersion, bool db = true);
 
         public abstract string LocalDataDirectory(string relativePath = null);
         public abstract string DBLinkString();

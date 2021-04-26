@@ -20,7 +20,7 @@ namespace UpdaterClient
     /// </summary>
     public partial class Restore : Window
     {
-        PatchClient.PatchLauncher launcher = new PatchClient.PatchLauncher();
+        Patcher.Tornado2000S.PatchLauncher launcher = new Patcher.Tornado2000S.PatchLauncher();
        
         TextBoxOutputter txtBoxPutter;
         public Restore()

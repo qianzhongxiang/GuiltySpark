@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.30611.23
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GuiltySpark", "GuiltySpark\GuiltySpark.csproj", "{C242AC46-E744-432D-901E-125F3EC8DDF8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PatchClient", "PatchClient\PatchClient.csproj", "{81E3334E-F47A-48DA-BE8B-B3CE9B8DC8C9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataManager.Tornado2000S", "PatchClient\DataManager.Tornado2000S.csproj", "{81E3334E-F47A-48DA-BE8B-B3CE9B8DC8C9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitGuiltySpark", "Unit\UnitGuiltySpark\UnitGuiltySpark.csproj", "{7F71F6C3-AD7B-408D-8112-D971F96B4090}"
 EndProject
