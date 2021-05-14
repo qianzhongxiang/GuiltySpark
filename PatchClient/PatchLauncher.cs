@@ -11,6 +11,15 @@ namespace Patcher.Tornado2000S
 {
     public class PatchLauncher : GuiltySpark.PatchLauncher
     {
+        public override string TargetRootDir
+        {
+            get => _TargetRootDir; 
+            set {
+                _TargetRootDir = value;
+                ConfigurationManager.AppSettings["data_path"] = LocalDataDirectory();
+            }
+        }
+
         public PatchLauncher()
         {
             ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
@@ -19,12 +28,17 @@ namespace Patcher.Tornado2000S
         }
         public override string DBLinkString()
         {
-            return GetConfig("ConnStrProfile").Attributes["value"].Value;
+            var node = GetConfig("ConnStrProfile");
+            if (node is null) {
+                return default;
+            }
+            return node.Attributes["value"].Value;
         }
 
         public override IEnumerable<DataItem> GetItems(int minDataVersion, int maxDataVersion, bool db = true)
         {
             var dirct = LocalDataDirectory("recipes");
+            if (dirct is null) yield break;
             var datas = new System.IO.DirectoryInfo(dirct).GetDirectories();
 
             DataInfo dataInfo = default;
@@ -57,16 +71,21 @@ namespace Patcher.Tornado2000S
         }
         public override string LocalDataDirectory(string relativePath = null)
         {
+            var node = GetConfig("data_path");
+            if (node is null) return default;
             if (relativePath is null)
-                return GetConfig("data_path").Attributes["value"].Value;
-            return System.IO.Path.Combine(GetConfig("data_path").Attributes["value"].Value, relativePath);
+                return node.Attributes["value"].Value;
+            return System.IO.Path.Combine(node.Attributes["value"].Value, relativePath);
         }
 
         private XmlNode GetConfig(string data_path)
         {
-
+            var config = System.IO.Path.Combine(TargetRootDir, "Tornado2000S.exe.config");
+            if (!System.IO.File.Exists(config)) {
+                return default;
+            }
             var xd = new XmlDocument();
-            xd.Load(System.IO.Path.Combine(TargetRootDir, "Tornado2000S.exe.config"));
+            xd.Load(config);
             var dataPathNode = xd.SelectSingleNode($"configuration/appSettings/add[@key=\"{data_path}\"]");
             return dataPathNode;
         }

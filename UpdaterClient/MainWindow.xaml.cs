@@ -14,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Serilog;
 
 namespace UpdaterClient
 {
@@ -32,21 +33,13 @@ namespace UpdaterClient
         }
         public MainWindow()
         {
-            InitializeComponent();
-            var textBoxOutputter = new TextBoxOutputter(consoleViewer);
-            Console.SetOut(textBoxOutputter);
-            launcher = new Patcher.Tornado2000S.PatchLauncher();
-            launcher.Logger = new ConsoleLogger { TextWriter = textBoxOutputter };
-            var infos = launcher.GetPatchInfos();
-            patchsViewer.Items.Clear();
-            ApplicationDir = launcher.TargetRootDir;
-            foreach (var item in infos)
-            {
-                patchsViewer.Items.Add(new ListViewItem { Height = 32, Content = $"Data Patch : v{item.DataVersion}" });
-                Console.WriteLine($"loaded a patch:v{item.DataVersion}");
-            }
+            Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .WriteTo.File("logs/log.txt", rollingInterval: RollingInterval.Day)
+            .CreateLogger();
 
-            UpdateItems();
+            InitializeComponent();
+            
         }
         private void UpdateItems()
         {
@@ -104,7 +97,31 @@ namespace UpdaterClient
         private void btn_restore_Click(object sender, RoutedEventArgs e)
         {
             var ww = new Restore();
+            ww.ResetLauncher(launcher.TargetRootDir);
             ww.ShowDialog();
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            Log.Information("1");
+            var textBoxOutputter = new TextBoxOutputter(consoleViewer);
+            Console.SetOut(textBoxOutputter);
+            Log.Information("2");
+            launcher = new Patcher.Tornado2000S.PatchLauncher();
+            launcher.Logger = new ConsoleLogger { TextWriter = textBoxOutputter };
+            Log.Information("3");
+            var infos = launcher.GetPatchInfos();
+            patchsViewer.Items.Clear();
+            Log.Information("4");
+            ApplicationDir = launcher.TargetRootDir;
+            foreach (var item in infos)
+            {
+                patchsViewer.Items.Add(new ListViewItem { Height = 32, Content = $"Data Patch : v{item.DataVersion}" });
+                Console.WriteLine($"loaded a patch:v{item.DataVersion}");
+            }
+            Log.Information("5");
+
+            UpdateItems();
         }
     }
 

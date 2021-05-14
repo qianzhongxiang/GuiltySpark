@@ -12,10 +12,11 @@ namespace GuiltySpark
     {
         public static string DATAINFOFILENAME = "DataInfo.json";
         public ConsoleLogger Logger;
+        protected string _TargetRootDir = new System.IO.DirectoryInfo(System.IO.Path.GetDirectoryName(new Uri(Assembly.GetAssembly(typeof(PatchLauncher)).CodeBase).LocalPath)).Parent.FullName;
         /// <summary>
         /// 默认程序集更目录的上级
         /// </summary>
-        public string TargetRootDir { get; set; } = new System.IO.DirectoryInfo(System.IO.Path.GetDirectoryName(new Uri(Assembly.GetAssembly(typeof(PatchLauncher)).CodeBase).LocalPath)).Parent.FullName;
+        public virtual string TargetRootDir { get => _TargetRootDir; set { _TargetRootDir = value; } } 
 
         //protected abstract DataPatchBase GetDataPatchInstance(Type patchType,AssemblyName assemblyName, AppDomain appDomain);
 

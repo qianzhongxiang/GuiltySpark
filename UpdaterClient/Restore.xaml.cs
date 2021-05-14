@@ -26,10 +26,10 @@ namespace UpdaterClient
         public Restore()
         {
             InitializeComponent();
-            txtBoxPutter = new TextBoxOutputter(tb_console);
-            Console.SetOut(txtBoxPutter);
-            launcher.Logger = new GuiltySpark.ConsoleLogger { TextWriter = txtBoxPutter };
-            UpdateHistorys();
+        }
+
+        public void ResetLauncher(string appDir) {
+            launcher.TargetRootDir = appDir;
         }
 
         void UpdateHistorys()
@@ -45,7 +45,11 @@ namespace UpdaterClient
 
         IEnumerable<string> GetHistorys()
         {
-            var dir = new System.IO.DirectoryInfo(launcher.LocalDataDirectory("history"));
+            var history = launcher.LocalDataDirectory("history");
+            if (history is null) {
+                yield break;
+            }
+            var dir = new System.IO.DirectoryInfo(history);
             if (!dir.Exists)
             {
                 yield break;
@@ -78,6 +82,14 @@ namespace UpdaterClient
             {
                 launcher.Restore(dir.FullName, int.Parse(dirName.Split('.')[1]));
             });
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            txtBoxPutter = new TextBoxOutputter(tb_console);
+            Console.SetOut(txtBoxPutter);
+            launcher.Logger = new GuiltySpark.ConsoleLogger { TextWriter = txtBoxPutter };
+            UpdateHistorys();
         }
     }
 }
