@@ -154,9 +154,11 @@ namespace GuiltySpark
             {
                 throw new Exception("未找到合适的补丁包");
             }
+#if net472
             AppDomain domain = null;
             try
             {
+
                 System.Security.Policy.Evidence evidence = new System.Security.Policy.Evidence(AppDomain.CurrentDomain.Evidence);
                 AppDomainSetup setup = AppDomain.CurrentDomain.SetupInformation;
                 domain = AppDomain.CreateDomain(info.ID + "Domain", evidence, setup);
@@ -176,6 +178,7 @@ namespace GuiltySpark
                     AppDomain.Unload(domain);
                 }
             }
+#endif
         }
 
         private void Restore(string restoreDir, string patchDir, int patchDataVersion)
