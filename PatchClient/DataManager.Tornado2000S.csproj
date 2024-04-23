@@ -7,10 +7,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<Compile Remove="PatchHelper.cs" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<Folder Include="Patchs\" />
 	</ItemGroup>
 
