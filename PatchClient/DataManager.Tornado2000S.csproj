@@ -1,24 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-	<PropertyGroup>
-		<OutputType>Exe</OutputType>
-		<TargetFrameworks>net472;net6.0</TargetFrameworks>
-		<Version>0.0.0.5</Version>
-	</PropertyGroup>
-
-	<ItemGroup>
-		<Folder Include="Patchs\" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<ProjectReference Include="..\GuiltySpark\GuiltySpark.csproj" />
-	</ItemGroup>
-	<ItemGroup>
-		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" PrivateAssets="all" />
-	</ItemGroup>
-
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net472;net6.0</TargetFrameworks>
+    <Version>0.0.0.6</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="Patchs\" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\GuiltySpark\GuiltySpark.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" PrivateAssets="all" />
+  </ItemGroup>
 </Project>
